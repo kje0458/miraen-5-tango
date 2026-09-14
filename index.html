@@ -9,6 +9,7 @@
             --primary-color: #4A90E2;
             --success-color: #2ECC71;
             --error-color: #E74C3C;
+            --badge-color: #FF9F43;
             --background-color: #F4F7F6;
             --card-background: #FFFFFF;
             --text-color: #333333;
@@ -39,26 +40,59 @@
             max-width: 500px;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         h1 {
             color: var(--primary-color);
             font-size: 1.6rem;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         p.subtitle {
             color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 25px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
         }
 
         .btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 14px 28px;
-            font-size: 1.05rem;
+            padding: 14px 20px;
+            font-size: 1rem;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -71,12 +105,16 @@
             transform: translateY(-2px);
         }
 
+        .btn-secondary {
+            background-color: #6C757D;
+        }
+
         .progress-bar {
             width: 100%;
             height: 10px;
             background-color: #E0E0E0;
             border-radius: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             overflow: hidden;
         }
 
@@ -87,15 +125,26 @@
             transition: width 0.3s ease;
         }
 
+        .quiz-type-badge {
+            display: inline-block;
+            background-color: var(--badge-color);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
         .word-card {
             background-color: #F8F9FA;
             border: 2px solid #E9ECEF;
             border-radius: 15px;
-            padding: 30px 15px;
-            margin-bottom: 25px;
+            padding: 25px 15px;
+            margin-bottom: 20px;
         }
 
-        .word-japanese {
+        .word-display {
             font-size: 2.2rem;
             font-weight: bold;
             color: #2C3E50;
@@ -104,7 +153,7 @@
         .options-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
@@ -113,7 +162,7 @@
             border: 2px solid #DEE2E6;
             padding: 14px;
             border-radius: 12px;
-            font-size: 1rem;
+            font-size: 1.05rem;
             cursor: pointer;
             transition: all 0.2s;
             text-align: left;
@@ -138,10 +187,10 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
-        /* 결과 화면 피드백 박스 */
+        /* 피드백 및 오답노트 */
         .feedback-box {
             background-color: #EBF5FF;
             border-left: 5px solid var(--primary-color);
@@ -155,8 +204,8 @@
 
         .wrong-list {
             text-align: left;
-            margin: 20px 0;
-            max-height: 200px;
+            margin: 15px 0;
+            max-height: 180px;
             overflow-y: auto;
             border-top: 1px solid #EEE;
             padding-top: 10px;
@@ -165,108 +214,168 @@
         .wrong-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 8px 0;
             border-bottom: 1px dashed #EEE;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .score-display {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
             color: var(--primary-color);
-            margin: 15px 0;
+            margin: 10px 0;
         }
+
+        /* 랭킹 표 */
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .ranking-table th, .ranking-table td {
+            padding: 10px;
+            border-bottom: 1px solid #E0E0E0;
+            text-align: center;
+        }
+
+        .ranking-table th {
+            background-color: #F8F9FA;
+            color: #555;
+        }
+
+        .rank-1 { font-weight: bold; color: #FFD700; }
+        .rank-2 { font-weight: bold; color: #C0C0C0; }
+        .rank-3 { font-weight: bold; color: #CD7F32; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 시작 화면 -->
+    <!-- 1. 시작 화면 -->
     <div id="start-screen">
         <h1>🇯🇵 일본어 5과 단어 마스터</h1>
-        <p class="subtitle">위치, 장소, 과거 표현 단어를 점검해보세요!</p>
-        <button class="btn" onclick="startGame()">게임 시작하기 🚀</button>
+        <p class="subtitle">뜻 맞추기 & 히라가나 읽기/표기 퀴즈</p>
+        
+        <div class="input-group">
+            <label for="student-name">학생 이름 (또는 학번/이름):</label>
+            <input type="text" id="student-name" class="input-field" placeholder="예: 10101 홍길동" maxlength="15">
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="startGame()">퀴즈 시작 🚀</button>
+            <button class="btn btn-secondary" onclick="showRanking()">🏆 랭킹 보기</button>
+        </div>
     </div>
 
-    <!-- 퀴즈 진행 화면 -->
+    <!-- 2. 퀴즈 진행 화면 -->
     <div id="quiz-screen" class="hidden">
         <div class="progress-bar">
             <div id="progress" class="progress"></div>
         </div>
-        <div style="display: flex; justify: space-between; margin-bottom: 10px; font-size: 0.85rem; color: #777;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; color: #777;">
             <span id="question-count">문제 1 / 10</span>
             <span id="score-count">점수: 0</span>
         </div>
         <div class="word-card">
-            <div id="word-japanese" class="word-japanese">単語</div>
+            <span id="quiz-badge" class="quiz-type-badge">뜻 맞추기</span>
+            <div id="word-display" class="word-display">単語</div>
         </div>
         <div id="options-container" class="options-grid"></div>
     </div>
 
-    <!-- 결과 화면 -->
+    <!-- 3. 결과 화면 -->
     <div id="result-screen" class="hidden">
-        <h1>🎉 테스트 완료!</h1>
+        <h2>🎉 테스트 완료!</h2>
+        <p id="result-user-name" style="color: #666; margin-top: 5px;"></p>
         <div id="score-display" class="score-display">0점</div>
         
-        <!-- 개별 맞춤 피드백 -->
+        <!-- 약점 분석 피드백 -->
         <div class="feedback-box">
-            <strong>📋 선생님의 피드백:</strong>
+            <strong>📋 선생님의 약점 피드백:</strong>
             <div id="feedback-text" style="margin-top: 5px;"></div>
         </div>
 
         <!-- 오답 노트 -->
         <div id="wrong-container" class="hidden">
-            <h3 style="text-align: left; font-size: 1rem; color: #555;">📌 오답 노트</h3>
+            <h3 style="text-align: left; font-size: 0.95rem; color: #555;">📌 틀린 문제 복습 노트</h3>
             <div id="wrong-list" class="wrong-list"></div>
         </div>
 
-        <button class="btn" onclick="startGame()" style="margin-top: 10px;">다시 도전하기 🔄</button>
+        <div class="btn-group" style="margin-top: 15px;">
+            <button class="btn" onclick="startGame()">다시 도전 🔄</button>
+            <button class="btn btn-secondary" onclick="showRanking()">🏆 전체 랭킹</button>
+        </div>
+    </div>
+
+    <!-- 4. 랭킹 화면 -->
+    <div id="ranking-screen" class="hidden">
+        <h2>🏆 명예의 전당 (Top 10)</h2>
+        <p class="subtitle">높은 점수 & 빠른 기록순</p>
+        
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>이름</th>
+                    <th>점수</th>
+                    <th>날짜</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-list">
+                <!-- 랭킹 목록이 생성됩니다 -->
+            </tbody>
+        </table>
+
+        <button class="btn" onclick="backToHome()" style="margin-top: 10px;">처음으로 돌아가기 🏠</button>
     </div>
 </div>
 
 <script>
-    // 5과 수업 PPT 단어 데이터 세트
+    // 5과 핵심 단어 DB (한자, 히라가나, 한국어 뜻, 카테고리)
     const wordBank = [
         // 위치/방향
-        { jp: "上 (うえ)", ko: "위", cat: "위치/방향" },
-        { jp: "下 (した)", ko: "아래", cat: "위치/방향" },
-        { jp: "中 (なか)", ko: "안", cat: "위치/방향" },
-        { jp: "となり", ko: "(바로) 옆", cat: "위치/방향" },
-        { jp: "前 (まえ)", ko: "앞", cat: "위치/방향" },
-        { jp: "うしろ", ko: "뒤", cat: "위치/방향" },
-        { jp: "みぎ", ko: "오른쪽", cat: "위치/방향" },
-        { jp: "ひだり", ko: "왼쪽", cat: "위치/방향" },
-        { jp: "よこ", ko: "(가로) 옆", cat: "위치/방향" },
+        { kanji: "上", hira: "うえ", ko: "위", cat: "위치/방향" },
+        { kanji: "下", hira: "した", ko: "아래", cat: "위치/방향" },
+        { kanji: "中", hira: "なか", ko: "안/속", cat: "위치/방향" },
+        { kanji: "-", hira: "となり", ko: "(바로) 옆", cat: "위치/방향" },
+        { kanji: "前", hira: "まえ", ko: "앞", cat: "위치/방향" },
+        { kanji: "-", hira: "うしろ", ko: "뒤", cat: "위치/방향" },
+        { kanji: "-", hira: "みぎ", ko: "오른쪽", cat: "위치/방향" },
+        { kanji: "-", hira: "ひだり", ko: "왼쪽", cat: "위치/방향" },
+        { kanji: "-", hira: "よこ", ko: "가로/옆", cat: "위치/방향" },
         
-        // 장소
-        { jp: "バスてい", ko: "버스 정류장", cat: "장소 단어" },
-        { jp: "コンビニ", ko: "편의점", cat: "장소 단어" },
-        { jp: "としょかん", ko: "도서관", cat: "장소 단어" },
-        { jp: "こうえん", ko: "공원", cat: "장소 단어" },
-        { jp: "ゆうびんきょく", ko: "우체국", cat: "장소 단어" },
-        { jp: "えき", ko: "역", cat: "장소 단어" },
-        { jp: "こうばん", ko: "파출소", cat: "장소 단어" },
-        { jp: "えいがかん", ko: "영화관", cat: "장소 단어" },
-        { jp: "ゆうえんち", ko: "놀이공원", cat: "장소 단어" },
-        { jp: "ぎんこう", ko: "은행", cat: "장소 단어" },
-        { jp: "くすりや", ko: "약국", cat: "장소 단어" },
-        { jp: "デパート", ko: "백화점", cat: "장소 단어" },
+        // 장소 단어
+        { kanji: "-", hira: "バスてい", ko: "버스 정류장", cat: "장소 단어" },
+        { kanji: "-", hira: "コンビニ", ko: "편의점", cat: "장소 단어" },
+        { kanji: "-", hira: "としょかん", ko: "도서관", cat: "장소 단어" },
+        { kanji: "-", hira: "こうえん", ko: "공원", cat: "장소 단어" },
+        { kanji: "-", hira: "ゆうびんきょく", ko: "우체국", cat: "장소 단어" },
+        { kanji: "駅", hira: "えき", ko: "역", cat: "장소 단어" },
+        { kanji: "交番", hira: "こうばん", ko: "파출소", cat: "장소 단어" },
+        { kanji: "映画館", hira: "えいがかん", ko: "영화관", cat: "장소 단어" },
+        { kanji: "遊園地", hira: "ゆうえんち", ko: "놀이공원", cat: "장소 단어" },
+        { kanji: "銀行", hira: "ぎんこう", ko: "은행", cat: "장소 단어" },
+        { kanji: "薬屋", hira: "くすりや", ko: "약국", cat: "장소 단어" },
+        { kanji: "-", hira: "デパート", ko: "백화점", cat: "장소 단어" },
 
-        // 형용사 및 과거형 표현
-        { jp: "おいしかったです", ko: "맛있었습니다", cat: "과거형 표현" },
-        { jp: "楽しかったです", ko: "즐거웠습니다", cat: "과거형 표현" },
-        { jp: "きれいでした", ko: "예뻤습니다", cat: "과거형 표현" },
-        { jp: "にぎやかでした", ko: "북적였습니다", cat: "과거형 표현" },
-        { jp: "すてきだ", ko: "멋지다", cat: "형용사/기타" },
+        // 과거형 및 형용사/표현
+        { kanji: "-", hira: "おいしかったです", ko: "맛있었습니다", cat: "과거형/표현" },
+        { kanji: "楽しかったです", hira: "たのしかったです", ko: "즐거웠습니다", cat: "과거형/표현" },
+        { kanji: "-", hira: "きれいでした", ko: "예뻤습니다", cat: "과거형/표현" },
+        { kanji: "-", hira: "にぎやかでした", ko: "북적였습니다", cat: "과거형/표현" },
+        { kanji: "-", hira: "すてきだ", ko: "멋지다", cat: "형용사/기타" },
+        { kanji: "-", hira: "たいへんだ", ko: "힘들다", cat: "형용사/기타" },
 
-        // 기초 핵심 단어 및 문법
-        { jp: "あります", ko: "(사물 등이) 있습니다", cat: "존재 표현" },
-        { jp: "います", ko: "(사람, 동물이) 있습니다", cat: "존재 표현" },
-        { jp: "つくえ", ko: "책상", cat: "사물/사람" },
-        { jp: "いす", ko: "의자", cat: "사물/사람" },
-        { jp: "せんせい", ko: "선생님", cat: "사물/사람" },
-        { jp: "花火大会", ko: "불꽃 축제", cat: "형용사/기타" },
-        { jp: "たいへんだ", ko: "힘들다", cat: "형용사/기타" }
+        // 존재 표현 및 사물
+        { kanji: "-", hira: "あります", ko: "(사물이) 있습니다", cat: "존재 표현" },
+        { kanji: "-", hira: "います", ko: "(사람/동물이) 있습니다", cat: "존재 표현" },
+        { kanji: "-", hira: "つくえ", ko: "책상", cat: "사물/사람" },
+        { kanji: "-", hira: "いす", ko: "의자", cat: "사물/사람" },
+        { kanji: "先生", hira: "せんせい", ko: "선생님", cat: "사물/사람" },
+        { kanji: "花火大会", hira: "はなびたいかい", ko: "불꽃 축제", cat: "형용사/기타" }
     ];
 
     const TOTAL_QUESTIONS = 10;
@@ -275,16 +384,32 @@
     let score = 0;
     let wrongAnswers = [];
     let isClickable = true;
+    let studentName = "";
 
     function startGame() {
-        // 배열 섞기 및 10문제 무작위 추출
-        currentQuestions = [...wordBank].sort(() => Math.random() - 0.5).slice(0, TOTAL_QUESTIONS);
+        const nameInput = document.getElementById('student-name').value.trim();
+        if (!nameInput && !studentName) {
+            alert('학생 이름(또는 학번)을 입력해주세요!');
+            return;
+        }
+        if (nameInput) studentName = nameInput;
+
+        // 문제 무작위 추출 및 문제 유형 지정 (meaning: 뜻 맞추기, hiragana: 히라가나 맞추기)
+        currentQuestions = [...wordBank]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, TOTAL_QUESTIONS)
+            .map(q => ({
+                ...q,
+                type: Math.random() < 0.5 ? 'meaning' : 'hiragana' // 50% 확률로 문제 유형 분기
+            }));
+
         currentIndex = 0;
         score = 0;
         wrongAnswers = [];
 
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('ranking-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
 
         showQuestion();
@@ -294,33 +419,58 @@
         isClickable = true;
         const q = currentQuestions[currentIndex];
         
-        // UI 업데이트
         document.getElementById('progress').style.width = `${(currentIndex / TOTAL_QUESTIONS) * 100}%`;
         document.getElementById('question-count').innerText = `문제 ${currentIndex + 1} / ${TOTAL_QUESTIONS}`;
         document.getElementById('score-count').innerText = `점수: ${score * 10}`;
-        document.getElementById('word-japanese').innerText = q.jp;
 
-        // 보기 4개 구성 (정답 1개 + 오답 3개)
-        const wrongOptions = wordBank
-            .filter(item => item.ko !== q.ko)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
-        
-        const options = [...wrongOptions, q].sort(() => Math.random() - 0.5);
-
+        const badge = document.getElementById('quiz-badge');
+        const display = document.getElementById('word-display');
         const container = document.getElementById('options-container');
         container.innerHTML = '';
+
+        let correctAnswerText = "";
+        let wrongOptions = [];
+
+        if (q.type === 'meaning') {
+            // [유형 1] 뜻 맞추기: 일본어 단어를 보고 한글 뜻 맞추기
+            badge.innerText = "🎯 뜻 맞추기";
+            badge.style.backgroundColor = "#4A90E2";
+            display.innerText = q.kanji !== '-' ? `${q.kanji} (${q.hira})` : q.hira;
+            correctAnswerText = q.ko;
+
+            wrongOptions = wordBank
+                .filter(item => item.ko !== q.ko)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(item => item.ko);
+
+        } else {
+            // [유형 2] 히라가나/읽기 맞추기: 한글 뜻(또는 한자)을 보고 히라가나 표기 맞추기
+            badge.innerText = "✍️ 히라가나 읽기/표기 맞추기";
+            badge.style.backgroundColor = "#FF9F43";
+            display.innerText = q.kanji !== '-' ? `${q.ko} [${q.kanji}]` : q.ko;
+            correctAnswerText = q.hira;
+
+            wrongOptions = wordBank
+                .filter(item => item.hira !== q.hira)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(item => item.hira);
+        }
+
+        // 보기 4개 섞기
+        const options = [...wrongOptions, correctAnswerText].sort(() => Math.random() - 0.5);
 
         options.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
-            btn.innerText = opt.ko;
-            btn.onclick = () => selectOption(btn, opt.ko === q.ko, q);
+            btn.innerText = opt;
+            btn.onclick = () => selectOption(btn, opt === correctAnswerText, q, correctAnswerText);
             container.appendChild(btn);
         });
     }
 
-    function selectOption(btn, isCorrect, question) {
+    function selectOption(btn, isCorrect, question, correctAnswerText) {
         if (!isClickable) return;
         isClickable = false;
 
@@ -329,12 +479,12 @@
             score++;
         } else {
             btn.classList.add('wrong');
-            wrongAnswers.push(question);
+            wrongAnswers.push({ ...question, correctText: correctAnswerText });
             
-            // 정답 표시해주기
+            // 정답 표시
             const buttons = document.querySelectorAll('.option-btn');
             buttons.forEach(b => {
-                if (b.innerText === question.ko) {
+                if (b.innerText === correctAnswerText) {
                     b.classList.add('correct');
                 }
             });
@@ -355,9 +505,13 @@
         document.getElementById('result-screen').classList.remove('hidden');
 
         const finalScore = score * 10;
+        document.getElementById('result-user-name').innerText = `👤 ${studentName} 학생의 결과`;
         document.getElementById('score-display').innerText = `${finalScore}점`;
 
-        // 카테고리별 오답 분석 및 피드백 생성
+        // 랭킹 저장 (LocalStorage)
+        saveRanking(studentName, finalScore);
+
+        // 카테고리별 오답 분석
         const catCount = {};
         wrongAnswers.forEach(item => {
             catCount[item.cat] = (catCount[item.cat] || 0) + 1;
@@ -365,22 +519,20 @@
 
         let feedback = "";
         if (score === TOTAL_QUESTIONS) {
-            feedback = "🏆 **완벽합니다!** 5과 단어를 아주 훌륭하게 암기하고 있네요!";
+            feedback = "🏆 **완벽합니다!** 5과 일본어 뜻과 히라가나 표기를 완벽하게 마스터했네요!";
         } else {
-            // 가장 많이 틀린 카테고리 추출
             let weakestCat = Object.keys(catCount).reduce((a, b) => catCount[a] > catCount[b] ? a : b);
-            
             if (score >= 8) {
-                feedback = `훌륭한 성적입니다! 전반적으로 잘 이해하고 있지만, **'${weakestCat}'** 관련 단어를 조금 더 살펴본다면 완벽해질 거예요!`;
+                feedback = `훌륭해요! 대부분 잘 알고 있지만, **'${weakestCat}'** 카테고리 단어의 읽기와 뜻을 조금만 더 다듬으면 완벽합니다!`;
             } else if (score >= 5) {
-                feedback = `기초는 잘 잡혀 있습니다! 특히 **'${weakestCat}'** 영역 단어에서 실수가 자주 발생했으니 교과서를 다시 한번 체크해 보세요!`;
+                feedback = `기본기가 잡혀가고 있습니다! **'${weakestCat}'** 영역에서 감점이 많았으니, 오답 노트를 보며 히라가나를 써보세요.`;
             } else {
-                feedback = `조금 더 연습이 필요해요! **'${weakestCat}'** 단어를 포함해 5과 전체 단어카드를 집중적으로 복습해 볼 것을 추천합니다.`;
+                feedback = `열심히 복습이 필요합니다! 특히 **'${weakestCat}'** 단어의 히라가나 표기와 뜻을 교과서 5과에서 다시 찾아보세요!`;
             }
         }
         document.getElementById('feedback-text').innerHTML = feedback;
 
-        // 오답 노트 출력
+        // 오답 노트 리스트 출력
         const wrongContainer = document.getElementById('wrong-container');
         const wrongList = document.getElementById('wrong-list');
         wrongList.innerHTML = '';
@@ -390,12 +542,70 @@
             wrongAnswers.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'wrong-item';
-                div.innerHTML = `<span><strong>${item.jp}</strong></span> <span style="color: #2ECC71;">정답: ${item.ko}</span>`;
+                
+                const wordLabel = item.kanji !== '-' ? `${item.kanji} (${item.hira})` : item.hira;
+                div.innerHTML = `
+                    <span><strong>${wordLabel}</strong> - ${item.ko}</span>
+                    <span style="color: #2ECC71; font-weight: bold;">[정답: ${item.correctText}]</span>
+                `;
                 wrongList.appendChild(div);
             });
         } else {
             wrongContainer.classList.add('hidden');
         }
+    }
+
+    // 랭킹 저장 함수
+    function saveRanking(name, score) {
+        let rankings = JSON.parse(localStorage.getItem('miraen_jp_rankings')) || [];
+        const today = new Date();
+        const dateStr = `${today.getMonth() + 1}/${today.getDate()} ${today.getHours()}:${String(today.getMinutes()).padStart(2, '0')}`;
+        
+        rankings.push({ name, score, date: dateStr });
+        // 점수 높은 순 정렬
+        rankings.sort((a, b) => b.score - a.score);
+        // 상위 10개만 보관
+        rankings = rankings.slice(0, 10);
+
+        localStorage.setItem('miraen_jp_rankings', JSON.stringify(rankings));
+    }
+
+    // 랭킹 화면 보여주기
+    function showRanking() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('ranking-screen').classList.remove('hidden');
+
+        const rankingList = document.getElementById('ranking-list');
+        rankingList.innerHTML = '';
+
+        const rankings = JSON.parse(localStorage.getItem('miraen_jp_rankings')) || [];
+
+        if (rankings.length === 0) {
+            rankingList.innerHTML = `<tr><td colspan="4" style="color:#999;">아직 등록된 랭킹이 없습니다.</td></tr>`;
+            return;
+        }
+
+        rankings.forEach((rank, index) => {
+            const tr = document.createElement('tr');
+            let rankClass = '';
+            if (index === 0) rankClass = 'rank-1';
+            else if (index === 1) rankClass = 'rank-2';
+            else if (index === 2) rankClass = 'rank-3';
+
+            tr.innerHTML = `
+                <td class="${rankClass}">${index + 1}위</td>
+                <td><strong>${rank.name}</strong></td>
+                <td>${rank.score}점</td>
+                <td style="font-size: 0.78rem; color: #888;">${rank.date}</td>
+            `;
+            rankingList.appendChild(tr);
+        });
+    }
+
+    function backToHome() {
+        document.getElementById('ranking-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
     }
 </script>
 </body>
