@@ -3,428 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>일본어 단어 맞추기 게임</title>
-    <style>
-        :root {
-            --primary: #4A90E2;
-            --primary-hover: #357ABD;
-            --secondary: #FF6B6B;
-            --background: #F4F7F6;
-            --card-bg: #FFFFFF;
-            --text: #333333;
-            --correct: #2ECC71;
-            --wrong: #E74C3C;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            width: 100%;
-            max-width: 650px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            padding: 30px;
-            position: relative;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        h1, h2, h3 {
-            text-align: center;
-            color: #2C3E50;
-            margin-bottom: 20px;
-        }
-
-        p.subtitle {
-            text-align: center;
-            color: #7F8C8D;
-            margin-bottom: 25px;
-        }
-
-        /* Form Controls */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        input[type="text"], select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #DDD;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus, select:focus {
-            border-color: var(--primary);
-        }
-
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-secondary {
-            background-color: #95A5A6;
-        }
-        .btn-secondary:hover {
-            background-color: #7F8C8D;
-        }
-
-        /* Quiz Header */
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #EEE;
-        }
-
-        .badge {
-            background: #EBF5FB;
-            color: var(--primary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        /* Question Box */
-        .question-box {
-            background: #F8F9FA;
-            border-radius: 15px;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 25px;
-            border: 2px solid #E9ECEF;
-            position: relative;
-        }
-
-        .question-text {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2C3E50;
-            margin-bottom: 10px;
-        }
-
-        .tts-btn {
-            background: #FFF;
-            border: 1px solid #DDD;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 20px;
-            cursor: pointer;
-            margin-top: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-        }
-
-        .tts-btn:hover {
-            background: #EBF5FB;
-            transform: scale(1.1);
-        }
-
-        /* Options */
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        @media (max-width: 480px) {
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .option-btn {
-            background: #FFF;
-            border: 2px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .option-btn:hover {
-            border-color: var(--primary);
-            background-color: #F0F7FF;
-        }
-
-        .option-btn.correct {
-            background-color: var(--correct) !important;
-            color: white !important;
-            border-color: var(--correct) !important;
-        }
-
-        .option-btn.wrong {
-            background-color: var(--wrong) !important;
-            color: white !important;
-            border-color: var(--wrong) !important;
-        }
-
-        /* Result & Feedback */
-        .score-summary {
-            background: #EBF5FB;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .score-num {
-            font-size: 36px;
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .feedback-section {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .feedback-card {
-            background: #FFF0F0;
-            border-left: 5px solid var(--wrong);
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-
-        .feedback-card.all-correct {
-            background: #E8F8F5;
-            border-left-color: var(--correct);
-            text-align: center;
-        }
-
-        /* Ranking Table */
-        .ranking-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .ranking-table th, .ranking-table td {
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #EEE;
-        }
-
-        .ranking-table th {
-            background: #F8F9FA;
-            color: #7F8C8D;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-
-    <!-- 1. 시작 화면 -->
-    <div id="start-screen" class="screen active">
-        <h1>🇯🇵 일본어 단어 맞추기</h1>
-        <p class="subtitle">미래엔 일본어 교과서 단어 (한자 없음)</p>
-        
-        <div class="form-group">
-            <label for="student-name">학생 이름</label>
-            <input type="text" id="student-name" placeholder="이름을 입력하세요" maxlength="10">
-        </div>
-
-        <div class="form-group">
-            <label for="question-count">문제 수 선택</label>
-            <select id="question-count">
-                <option value="10">10 문제</option>
-                <option value="20" selected>20 문제</option>
-                <option value="30">30 문제</option>
-                <option value="all">전체 단어 풀기</option>
-            </select>
-        </div>
-
-        <button class="btn" onclick="startGame()">🎮 게임 시작하기</button>
-        <button class="btn btn-secondary" onclick="showRanking()">🏆 랭킹 보기</button>
-    </div>
-
-    <!-- 2. 퀴즈 화면 -->
-    <div id="quiz-screen" class="screen">
-        <div class="quiz-header">
-            <span class="badge" id="progress-text">문제 1/20</span>
-            <span class="badge" id="timer-text">⏱️ 0초</span>
-        </div>
-
-        <div class="question-box">
-            <div id="question-type" style="font-size: 14px; color: #888; margin-bottom: 5px;">[뜻 맞추기]</div>
-            <div class="question-text" id="question-display">단어</div>
-            <button class="tts-btn" onclick="playCurrentAudio()" title="발음 듣기">🔊</button>
-        </div>
-
-        <div class="options-grid" id="options-container">
-            <!-- 보기 버튼들이 dynamic하게 삽입됩니다 -->
-        </div>
-    </div>
-
-    <!-- 3. 결과 및 개별 오답 피드백 화면 -->
-    <div id="result-screen" class="screen">
-        <h2>🎉 퀴즈 종료!</h2>
-        
-        <div class="score-summary">
-            <div><span id="result-student-name">학생</span> 님의 최종 점수</div>
-            <div class="score-num" id="final-score">80점</div>
-            <div style="color: #7F8C8D; font-size: 14px; margin-top: 5px;" id="final-time">소요 시간: 45초</div>
-        </div>
-
-        <h3>📝 개별 오답 피드백</h3>
-        <div class="feedback-section" id="feedback-list">
-            <!-- 틀린 문제 피드백 들어감 -->
-        </div>
-
-        <button class="btn" onclick="restartGame()">🔄 다시 도전하기</button>
-        <button class="btn btn-secondary" onclick="showRanking()">🏆 랭킹 확인하기</button>
-    </div>
-
-    <!-- 4. 랭킹 화면 -->
-    <div id="ranking-screen" class="screen">
-        <h2>🏆 명예의 전당 (Top 10)</h2>
-        <table class="ranking-table">
-            <thead>
-                <tr>
-                    <th>순위</th>
-                    <th>이름</th>
-                    <th>점수</th>
-                    <th>시간</th>
-                </tr>
-            </thead>
-            <tbody id="ranking-list">
-                <!-- 랭킹 목록 들어감 -->
-            </tbody>
-        </table>
-        <button class="btn" onclick="goHome()">🏠 메인으로 돌아가기</button>
-        <button class="btn btn-secondary" style="margin-top: 5px; font-size: 12px; padding: 8px;" onclick="clearRanking()">선생님용: 랭킹 초기화</button>
-    </div>
-
-</div>
-
-<script>
-    // 미래엔 일본어 교과서 PPT 기준 단어 데이터 (한자 제외 버전)
-    const vocabularyList = [
-        // 5단원
-        { kana: "うえ", meaning: "위" },
-        { kana: "した", meaning: "아래" },
-        { kana: "なか", meaning: "안" },
-        { kana: "となり", meaning: "(바로) 옆" },
-        { kana: "まえ", meaning: "앞" },
-        { kana: "うしろ", meaning: "뒤" },
-        { kana: "みぎ", meaning: "오른쪽" },
-        { kana: "ひだり", meaning: "왼쪽" },
-        { kana: "よこ", meaning: "(가로) 옆" },
-        { kana: "あります", meaning: "(사물 등이) 있습니다" },
-        { kana: "せんせい", meaning: "선생님" },
-        { kana: "いす", meaning: "의자" },
-        { kana: "つくえ", meaning: "책상" },
-        { kana: "あのう", meaning: "저, 저기" },
-        { kana: "バスてい", meaning: "버스 정류장" },
-        { kana: "どこ", meaning: "어디" },
-        { kana: "コンビニ", meaning: "편의점" },
-        { kana: "としょかん", meaning: "도서관" },
-        { kana: "こうえん", meaning: "공원" },
-        { kana: "ゆうびんきょく", meaning: "우체국" },
-        { kana: "えき", meaning: "역" },
-        { kana: "こうばん", meaning: "파출소" },
-        { kana: "いま", meaning: "지금" },
-        { kana: "います", meaning: "(사람, 동물이) 있습니다" },
-        { kana: "えいがかん", meaning: "영화관" },
-        { kana: "ゆうえんち", meaning: "놀이공원" },
-        { kana: "ぎんこう", meaning: "은행" },
-        { kana: "くすりや", meaning: "약국" },
-        { kana: "デパート", meaning: "백화점" },
-
-        // 25단원
-        { kana: "おいしかったです", meaning: "맛있었습니다" },
-        { kana: "たのしかったです", meaning: "즐거웠습니다" },
-        { kana: "きれいでした", meaning: "예뻤습니다" },
-        { kana: "にぎやかでした", meaning: "북적였습니다" },
-        { kana: "すてきだ", meaning: "멋지다" },
-        { kana: "とけい", meaning: "시계" },
-        { kana: "うた", meaning: "노래" },
-        { kana: "でも", meaning: "하지만" },
-        { kana: "미래엔 고등학교 일본어(5단원) 단어를 바탕으로 한자를 배제하고 히라가나/가타카나와 한국어 뜻으로 구성된 **단어 맞추기 웹 게임**을 제작했습니다.
-
-이 게임은 깃허브 페이지(GitHub Pages)에 바로 올릴 수 있는 단일 HTML 파일로 구성되어 있으며, 다음 기능들이 모두 포함되어 있습니다:
-
-- **한자 전면 배제**: 오직 히라가나, 가타카나, 한국어 뜻으로만 문제 구성
-- **50% 비율 맞춤**: 뜻 맞추기 50% + 히라가나/가타카나 맞추기 50% 균형 배치
-- **일본어 음성(TTS) 지원**: 문제를 풀 때 및 단어 클릭 시 일본어 발음 자동 재생 및 수동 듣기 버튼
-- **개별 오답 피드백**: 문제 제출 직후 힌트 및 퀴즈 종료 후 틀린 문제에 대한 상세 정답/뜻 비교 해설 제공
-- **랭킹(Leaderboard) 시스템**: 학생 이름 입력 후 점수에 따라 로컬 저장소(`localStorage`) 기반 명예의 전당 순위 표시
-
-I will now generate the complete HTML file for the Japanese vocabulary quiz game.
-
-```html:index.html
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>일본어 단어 마스터 퀴즈 (미래엔 5단원)</title>
     <!-- Tailwind CSS CDN -->
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    <!-- Google Fonts for Japanese & Korean -->
-    <link href="[https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+KR:wght@400;600;700;900&display=swap](https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+KR:wght@400;600;700;900&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -433,31 +18,22 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
         .jp-text {
             font-family: 'Kosugi Maru', 'Noto Sans KR', sans-serif;
         }
-        .animate-bounce-short {
-            animation: bounce 0.6s ease infinite alternate;
-        }
-        @keyframes bounce {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-8px); }
-        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
 
-    <!-- Container -->
     <div id="app" class="w-full max-w-2xl bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/50 p-6 md:p-8 transition-all">
 
-        <!-- ================= 화면 1: 시작 화면 ================= -->
+        <!-- 화면 1: 시작 화면 -->
         <div id="screen-start" class="space-y-6 text-center">
-            <div class="inline-block p-4 bg-indigo-100 rounded-full text-indigo-600 mb-2 animate-bounce-short">
-                <i class="fa-solid me-1 fa-graduation-cap text-5xl"></i>
+            <div class="inline-block p-4 bg-indigo-100 rounded-full text-indigo-600 mb-2">
+                <i class="fa-solid fa-graduation-cap text-5xl"></i>
             </div>
             <div>
                 <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">일본어 단어 퀴즈</h1>
-                <p class="text-slate-500 mt-2 text-sm md:text-base">미래엔 고등학교 일본어 5단원 핵심 단어 (한자 없음)</p>
+                <p class="text-slate-500 mt-2 text-sm md:text-base">미래엔 고등학교 일본어 5단원 (한자 없음)</p>
             </div>
 
-            <!-- 사용자 이름 입력 -->
             <div class="bg-indigo-50/70 p-5 rounded-2xl border border-indigo-100 text-left space-y-2">
                 <label for="player-name" class="block text-sm font-bold text-slate-700">
                     <i class="fa-solid fa-user text-indigo-500 mr-1"></i> 학생 이름을 입력하세요
@@ -466,7 +42,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                     class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white font-semibold text-lg">
             </div>
 
-            <!-- 퀴즈 설정 선택 -->
             <div class="grid grid-cols-2 gap-3 text-left">
                 <button onclick="selectQuestionCount(10)" id="btn-count-10" 
                     class="count-btn p-4 rounded-xl border-2 border-indigo-500 bg-indigo-50 text-indigo-700 font-bold flex items-center justify-between">
@@ -480,9 +55,8 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 </button>
             </div>
 
-            <!-- 음성 테스트 버튼 -->
             <div class="flex items-center justify-center space-x-2 text-sm text-slate-500">
-                <span>음성 발음 미리듣기:</span>
+                <span>발음 미리듣기:</span>
                 <button onclick="speakJapanese('こんにちは')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium flex items-center gap-1 transition">
                     <i class="fa-solid fa-volume-high text-indigo-500"></i> こんにちは (테스트)
                 </button>
@@ -498,9 +72,8 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             </div>
         </div>
 
-        <!-- ================= 화면 2: 퀴즈 화면 ================= -->
+        <!-- 화면 2: 퀴즈 화면 -->
         <div id="screen-quiz" class="hidden space-y-6">
-            <!-- 상단 상태바 -->
             <div class="flex items-center justify-between bg-slate-100 p-3 rounded-2xl">
                 <div class="flex items-center gap-2">
                     <span id="quiz-progress-text" class="text-sm font-bold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">1 / 10</span>
@@ -516,29 +89,22 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 </div>
             </div>
 
-            <!-- 진행률 바 -->
             <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                 <div id="progress-bar" class="bg-indigo-600 h-full w-0 transition-all duration-300"></div>
             </div>
 
-            <!-- 문제 카드 -->
             <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-3xl p-6 text-center shadow-inner relative">
-                <div class="text-xs font-semibold text-indigo-400 mb-1" id="question-category">Q. 다음 제시어의 알맞은 답을 고르세요</div>
+                <div class="text-xs font-semibold text-indigo-400 mb-1" id="question-category">Q. 제시어의 알맞은 답을 고르세요</div>
                 <div id="question-word" class="jp-text text-3xl md:text-4xl font-extrabold text-slate-800 my-4 tracking-wide">
                     ---
                 </div>
-                <!-- 음성 재생 버튼 -->
                 <button id="btn-audio-replay" onclick="playCurrentQuestionAudio()" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-full shadow transition">
                     <i class="fa-solid fa-volume-high"></i> 발음 듣기
                 </button>
             </div>
 
-            <!-- 선택지 목록 -->
-            <div id="options-container" class="grid grid-cols-1 gap-3">
-                <!-- 선택지 버튼들이 JS로 동적 생성됨 -->
-            </div>
+            <div id="options-container" class="grid grid-cols-1 gap-3"></div>
 
-            <!-- 즉각적인 문제 피드백 영역 -->
             <div id="feedback-box" class="hidden p-4 rounded-2xl border text-sm font-medium transition-all">
                 <div class="flex items-start gap-3">
                     <div id="feedback-icon" class="text-xl mt-0.5"></div>
@@ -549,15 +115,14 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 </div>
             </div>
 
-            <!-- 다음 문제 버튼 -->
             <button id="btn-next" onclick="nextQuestion()" class="hidden w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
                 <span>다음 문제로</span> <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
 
-        <!-- ================= 화면 3: 결과 화면 ================= -->
+        <!-- 화면 3: 결과 화면 -->
         <div id="screen-result" class="hidden space-y-6 text-center">
-            <div class="inline-block p-4 bg-emerald-100 rounded-full text-emerald-600 animate-bounce-short">
+            <div class="inline-block p-4 bg-emerald-100 rounded-full text-emerald-600">
                 <i class="fa-solid fa-trophy text-5xl"></i>
             </div>
             <div>
@@ -565,7 +130,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 <p id="result-greeting" class="text-slate-500 mt-1">수고하셨습니다!</p>
             </div>
 
-            <!-- 점수 결과 요약 카운터 -->
             <div class="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div>
                     <div class="text-xs text-slate-400 font-bold">최종 점수</div>
@@ -581,18 +145,14 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 </div>
             </div>
 
-            <!-- 개별 오답 피드백 섹션 -->
             <div class="text-left space-y-3">
                 <h3 class="font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-file-circle-exclamation text-rose-500"></i>
                     <span>복습 피드백 (틀린 문제 해설)</span>
                 </h3>
-                <div id="incorrect-feedback-list" class="max-h-60 overflow-y-auto space-y-2 pr-1">
-                    <!-- 오답 카드가 JS로 동적 생성됨 -->
-                </div>
+                <div id="incorrect-feedback-list" class="max-h-60 overflow-y-auto space-y-2 pr-1"></div>
             </div>
 
-            <!-- 하단 버튼 -->
             <div class="pt-2 flex flex-col sm:flex-row gap-3">
                 <button onclick="startGame()" class="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-rotate-right"></i> 다시 도전하기
@@ -603,7 +163,7 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             </div>
         </div>
 
-        <!-- ================= 화면 4: 랭킹 화면 ================= -->
+        <!-- 화면 4: 랭킹 화면 -->
         <div id="screen-leaderboard" class="hidden space-y-6">
             <div class="flex items-center justify-between border-b pb-4">
                 <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -614,14 +174,11 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 </button>
             </div>
 
-            <!-- 랭킹 리스트 -->
-            <div id="leaderboard-list" class="space-y-2">
-                <!-- 랭킹 아이템이 JS로 입력됨 -->
-            </div>
+            <div id="leaderboard-list" class="space-y-2"></div>
 
             <div class="pt-4 flex gap-3">
                 <button onclick="clearLeaderboard()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold rounded-xl text-xs transition">
-                    <i class="fa-solid fa-trash-can mr-1"></i> 랭킹 기록 초기화
+                    <i class="fa-solid fa-trash-can mr-1"></i> 랭킹 초기화
                 </button>
                 <button onclick="startGame()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition text-center">
                     바로 퀴즈 풀기
@@ -632,7 +189,7 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
     </div>
 
     <script>
-        // ================= 일본어 단어 데이터베이스 (미래엔 5단원 - 한자 제거) =================
+        // 일본어 단어 데이터베이스 (미래엔 5단원 - 한자 제거)
         const WORD_DATABASE = [
             { id: 1, kana: "うえ", mean: "위", hint: "위쪽/상단을 의미합니다." },
             { id: 2, kana: "した", mean: "아래", hint: "아래쪽/하단을 의미합니다." },
@@ -680,7 +237,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             { id: 44, kana: "たいへんだ", mean: "힘들다 / 큰일이다", hint: "고되거나 힘든 상태입니다." }
         ];
 
-        // ================= 전역 변수 설정 =================
         let totalQuestionsCount = 10;
         let currentQuestionIndex = 0;
         let score = 0;
@@ -690,18 +246,16 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
         let playerName = "";
         let isAnswerSubmitted = false;
 
-        // ================= 음성 지원 (TTS: Web Speech API) =================
         function speakJapanese(text) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // 진행 중인 음성 취소
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ja-JP';
-                utterance.rate = 0.85; // 학생들을 위해 약간 천천히
+                utterance.rate = 0.85;
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // ================= 화면 전환 함수 =================
         function showScreen(screenId) {
             ['screen-start', 'screen-quiz', 'screen-result', 'screen-leaderboard'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -713,7 +267,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             showScreen('screen-start');
         }
 
-        // ================= 문항 수 선택 =================
         function selectQuestionCount(count) {
             totalQuestionsCount = count;
             document.querySelectorAll('.count-btn').forEach(btn => {
@@ -726,31 +279,22 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             activeBtn.querySelector('i').className = "fa-solid fa-circle-check";
         }
 
-        // ================= 퀴즈 생성기 (50% 뜻 / 50% 히라가나 배분) =================
         function generateQuizList(count) {
-            // 원본 배열 복사 및 셔플
             const shuffled = [...WORD_DATABASE].sort(() => Math.random() - 0.5);
             const selectedWords = shuffled.slice(0, Math.min(count, shuffled.length));
 
             return selectedWords.map((item, index) => {
-                // index%2 === 0 이면 뜻 맞추기 (일본어 -> 한국어)
-                // index%2 === 1 이면 히라가나/가타카나 맞추기 (한국어 -> 일본어)
                 const isMeaningQuestion = (index % 2 === 0);
-
-                // 오답 선택지 3개 추출
                 const otherWords = WORD_DATABASE.filter(w => w.id !== item.id);
                 const shuffledOthers = otherWords.sort(() => Math.random() - 0.5).slice(0, 3);
 
                 let options = [];
                 if (isMeaningQuestion) {
-                    // 뜻 맞추기
                     options = [item.mean, ...shuffledOthers.map(o => o.mean)];
                 } else {
-                    // 히라가나 맞추기
                     options = [item.kana, ...shuffledOthers.map(o => o.kana)];
                 }
 
-                // 선택지 셔플
                 options.sort(() => Math.random() - 0.5);
 
                 return {
@@ -764,7 +308,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             });
         }
 
-        // ================= 퀴즈 시작 =================
         function startGame() {
             const nameInput = document.getElementById('player-name').value.trim();
             if (!nameInput) {
@@ -787,12 +330,10 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             loadQuestion();
         }
 
-        // ================= 문제 로드 =================
         function loadQuestion() {
             isAnswerSubmitted = false;
             const q = quizList[currentQuestionIndex];
 
-            // 진행도 및 상태바 업데이트
             document.getElementById('quiz-progress-text').innerText = `${currentQuestionIndex + 1} / ${quizList.length}`;
             document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / quizList.length) * 100}%`;
             
@@ -809,13 +350,9 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 category.innerText = "Q. 제시된 한국어 뜻에 알맞은 일본어 표현을 고르세요";
             }
 
-            // 제시어 표시
             document.getElementById('question-word').innerText = q.questionText;
-
-            // 자동 음성 재생 (일본어 단어인 경우)
             speakJapanese(q.targetWord.kana);
 
-            // 선택지 버튼 생성
             const container = document.getElementById('options-container');
             container.innerHTML = '';
 
@@ -823,7 +360,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 const btn = document.createElement('button');
                 btn.className = "option-btn w-full p-4 text-left font-semibold rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-800 transition flex items-center justify-between text-base md:text-lg shadow-sm";
                 
-                // option-btn layout
                 btn.innerHTML = `
                     <span class="flex items-center gap-3">
                         <span class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">${idx + 1}</span>
@@ -836,18 +372,15 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 container.appendChild(btn);
             });
 
-            // UI 보이기/숨기기 처리
             document.getElementById('feedback-box').className = "hidden p-4 rounded-2xl border text-sm font-medium transition-all";
             document.getElementById('btn-next').classList.add('hidden');
         }
 
-        // ================= 현재 문제 음성 다시 듣기 =================
         function playCurrentQuestionAudio() {
             const q = quizList[currentQuestionIndex];
             speakJapanese(q.targetWord.kana);
         }
 
-        // ================= 정답 확인 =================
         function checkAnswer(selectedOpt, selectedBtn) {
             if (isAnswerSubmitted) return;
             isAnswerSubmitted = true;
@@ -855,7 +388,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             const q = quizList[currentQuestionIndex];
             const isCorrect = (selectedOpt === q.correctAnswerText);
 
-            // 선택지 버튼 비활성화 및 정답/오답 표시
             const allBtns = document.querySelectorAll('.option-btn');
             allBtns.forEach(btn => {
                 btn.disabled = true;
@@ -902,7 +434,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 feedbackTitle.innerText = `아쉽네요! 오답입니다.`;
                 feedbackDesc.innerText = `올바른 답은 [${q.correctAnswerText}] 입니다. (${q.targetWord.hint})`;
 
-                // 오답 목록에 추가 (개별 피드백용)
                 wrongAnswers.push({
                     questionNum: currentQuestionIndex + 1,
                     kana: q.targetWord.kana,
@@ -914,14 +445,10 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 });
             }
 
-            // 선택된 답안 정답 유무와 무관하게 음성 들려주기
             speakJapanese(q.targetWord.kana);
-
-            // 다음 버튼 활성화
             document.getElementById('btn-next').classList.remove('hidden');
         }
 
-        // ================= 다음 문제 이동 =================
         function nextQuestion() {
             currentQuestionIndex++;
             if (currentQuestionIndex < quizList.length) {
@@ -931,7 +458,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             }
         }
 
-        // ================= 퀴즈 종료 및 결과 화면 =================
         function finishQuiz() {
             showScreen('screen-result');
 
@@ -944,7 +470,6 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             document.getElementById('final-accuracy').innerText = `${accuracy}%`;
             document.getElementById('final-correct-count').innerText = `${correctCount} / ${total}`;
 
-            // 오답 개별 피드백 출력
             const feedbackList = document.getElementById('incorrect-feedback-list');
             feedbackList.innerHTML = '';
 
@@ -952,7 +477,7 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 feedbackList.innerHTML = `
                     <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-center text-emerald-800 font-bold">
                         <i class="fa-solid fa-award text-emerald-600 text-xl mb-1 block"></i>
-                        만점입니다! 모든 단어를完璧하게 알고 계시네요!
+                        만점입니다! 모든 단어를 완벽하게 알고 계시네요!
                     </div>
                 `;
             } else {
@@ -978,11 +503,9 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
                 });
             }
 
-            // 랭킹 저장
             saveRank(playerName, score, accuracy);
         }
 
-        // ================= 랭킹 저장 & 불러오기 (localStorage) =================
         function saveRank(name, score, accuracy) {
             let rankings = JSON.parse(localStorage.getItem('jp_quiz_rankings') || '[]');
             const newRecord = {
@@ -993,9 +516,7 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
             };
 
             rankings.push(newRecord);
-            // 점수 순 내림차순 정렬
             rankings.sort((a, b) => b.score - a.score || b.accuracy - a.accuracy);
-            // 상위 10개만 유지
             rankings = rankings.slice(0, 10);
 
             localStorage.setItem('jp_quiz_rankings', JSON.stringify(rankings));
@@ -1063,23 +584,3 @@ I will now generate the complete HTML file for the Japanese vocabulary quiz game
     </script>
 </body>
 </html>
-```eof
-
-### 🌟 생성된 단어 맞추기 게임 특징 및 가이드
-
-1. **미래엔 고교 일본어 5단원 핵심 어휘 적용**:
-   - `うえ`, `した`, `なか`, `となり`, `まえ`, `うしろ`, `みぎ`, `ひだ리`, `よこ`, `あります`, `います`, `コンビニ`, `としょかん`, `こうえん`, `えいがかん`, `おいしかったです`, `たのしかったです` 등 총 44개 핵심 단어 탑재
-2. **한자 완전 배제**:
-   - 모든 문제는 히라가나/가타카나 및 한국어 뜻으로만 제공됩니다.
-3. **50% 비율 맞춤**:
-   - 홀수 문제는 **[일본어 ➔ 한국어 뜻]**, 짝수 문제는 **[한국어 뜻 ➔ 히라가나]**로 자동으로 균형 있게 분배됩니다.
-4. **음성(TTS) 지원**:
-   - 문제 제시 시 자동 발음 재생 및 언제든지 다시 들을 수 있는 버튼이 제공됩니다.
-5. **피드백 & 랭킹**:
-   - 문제 풀이 즉시 힌트 및 해설이 나오며, 완료 후 틀린 문제에 대해 개별 피드백 및 발음 다시듣기를 제공합니다.
-   - `localStorage` 기반 순위표가 자동으로 관리됩니다.
-
-### 🚀 깃허브(GitHub Pages) 업로드 방법
-1. 저장소(Repository)에 위의 `index.html` 파일 이름으로 업로드합니다.
-2. 저장소 **Settings > Pages** 메뉴에서 Source를 `main` 브랜치 / `root` 폴더로 지정하고 저장합니다.
-3. 1~2분 후 생성되는 웹 주소(예: `https://사용자명.github.io/리포지토리명`)로 학생들에게 공유하시면 됩니다!
