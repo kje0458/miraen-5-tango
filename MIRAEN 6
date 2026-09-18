@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일본어 6단원 단어 마스터 게임</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #50E3C2;
+            --correct-color: #2ECC71;
+            --wrong-color: #E74C3C;
+            --bg-color: #F4F7F6;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .screen { display: none; }
+        .active { display: block; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover { background-color: #357ABD; }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #eee;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .question-box {
+            background: #f9f9f9;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-tag {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            color: #333;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-box.correct {
+            background-color: #e8f8f0;
+            border: 1px solid var(--correct-color);
+            color: #1e7e44;
+        }
+
+        .feedback-box.wrong {
+            background-color: #fdeaea;
+            border: 1px solid var(--wrong-color);
+            color: #b92c1d;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .leaderboard-table th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 1. 시작 화면 -->
+    <div id="start-screen" class="screen active">
+        <h1>🎮 일본어 6단원 단어 게임</h1>
+        <p style="text-align: center; color: #666;">'しゃしんをとる予定です' 단원 마스터하기</p>
+        
+        <label for="student-class"><b>반 / 번호:</b></label>
+        <input type="text" id="student-class" placeholder="예: 1반 15번">
+        
+        <label for="student-name"><b>이름:</b></label>
+        <input type="text" id="student-name" placeholder="이름을 입력하세요">
+        
+        <button onclick="startGame()">게임 시작하기</button>
+    </div>
+
+    <!-- 2. 게임 진행 화면 -->
+    <div id="game-screen" class="screen">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        
+        <div class="question-box">
+            <span id="question-tag" class="question-tag">구분</span>
+            <div id="question-text" class="question-text">문제 내용</div>
+        </div>
+
+        <div id="options-container" class="options-grid"></div>
+
+        <div id="feedback-box" class="feedback-box">
+            <strong id="feedback-title"></strong>
+            <p id="feedback-desc" style="margin: 5px 0 0 0; font-size: 14px;"></p>
+        </div>
+
+        <button id="next-btn" style="display:none;" onclick="nextQuestion()">다음 문제 ▶</button>
+    </div>
+
+    <!-- 3. 결과 및 랭킹 화면 -->
+    <div id="result-screen" class="screen">
+        <h2>🎉 게임 종료!</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <p style="font-size: 18px;">최종 점수: <b id="final-score" style="font-size: 30px; color: var(--primary-color);">0</b> / 100점</p>
+        </div>
+
+        <h3>🏆 우리 반 실시간 랭킹</h3>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>반/번호</th>
+                    <th>이름</th>
+                    <th>점수</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+        </table>
+
+        <button onclick="location.reload()">다시 도전하기</button>
+    </div>
+</div>
+
+<script>
+    // 미래엔 6단원 어휘 기반 문제 은행 (뜻 맞추기 50% + 요미가나 읽기 50%)
+    const quizData = [
+        // [뜻 맞추기 문제들]
+        { type: "뜻 맞추기", q: "行く (いく)", options: ["가다", "오다", "만나다", "사다"], ans: 0, exp: "行く(いく)는 '가다'라는 뜻의 1류 동사입니다." },
+        { type: "뜻 맞추기", q: "読む (よむ)", options: ["쓰다", "읽다", "보다", "듣다"], ans: 1, exp: "読む(よむ)는 '읽다'라는 뜻의 1류 동사입니다." },
+        { type: "뜻 맞추기", q: "作る (つくる)", options: ["만들다", "놀다", "타다", "쉬다"], ans: 0, exp: "作る(つくる)는 '만들다'라는 뜻입니다." },
+        { type: "뜻 맞추기", q: "帰る (かえる)", options: ["사다", "바꾸다", "돌아가다", "자다"], ans: 2, exp: "帰る(かえる)는 '돌아가(오)다'라는 뜻의 예외 1류 동사입니다." },
+        { type: "뜻 맞추기", q: "予定 (よてい)", options: ["약속", "예정", "결정", "예약"], ans: 1, exp: "予定(よてい)는 '예정'을 뜻합니다." },
+        { type: "뜻 맞추기", q: "ボランティア", options: ["아르바이트", "봉사활동", "여행", "쇼핑"], ans: 1, exp: "ボランティア는 가타카나로 '봉사활동'을 뜻합니다." },
+
+        // [히라가나/요미가나 읽기 문제들]
+        { type: "히라가나 읽기", q: "'話す (이야기하다)'의 요미가나는?", options: ["はなす", "あう", "まつ", "のる"], ans: 0, exp: "話す의 히라가나 읽기는 'はなす'입니다." },
+        { type: "히라가나 읽기", q: "'会う (만나다)'의 요미가나는?", options: ["かう", "あう", "いう", "とう"], ans: 1, exp: "会う의 히라가나 읽기는 'あう'입니다." },
+        { type: "히라가나 읽기", q: "'夏休み (여름방학)'의 요미가나는?", options: ["なつやすみ", "ふゆやすみ", "しゅうまつ", "らいしゅう"], ans: 0, exp: "夏休み는 'なつやすみ'라고 읽습니다." },
+        { type: "히라가나 읽기", q: "'週末 (주말)'의 요미가나는?", options: ["らいしゅう", "こんしゅう", "しゅうまつ", "まいしゅう"], ans: 2, exp: "週末는 'しゅうまつ'라고 읽습니다." },
+        { type: "히라가나 읽기", q: "'泳ぐ (수영하다)'의 요미가나는?", options: ["あそぶ", "およぐ", "うたう", "ひく"], ans: 1, exp: "泳ぐ의 히라가나 읽기는 'およぐ'입니다." },
+        { type: "히라가나 읽기", q: "'写真 (사진)'의 요미가나는?", options: ["しゃしん", "かみ", "えいが", "てがみ"], ans: 0, exp: "写真은 'しゃしん'으로 읽습니다. (사진을 찍다: しゃしんをとる)" }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let studentInfo = { classInfo: '', name: '' };
+
+    function startGame() {
+        const classInput = document.getElementById('student-class').value.trim();
+        const nameInput = document.getElementById('student-name').value.trim();
+
+        if (!classInput || !nameInput) {
+            alert('반/번호와 이름을 모두 입력해주세요!');
+            return;
+        }
+
+        studentInfo.classInfo = classInput;
+        studentInfo.name = nameInput;
+
+        // 무작위로 10문제 추출
+        currentQuestions = [...quizData].sort(() => 0.5 - Math.random()).slice(0, 10);
+        currentIndex = 0;
+        score = 0;
+
+        showScreen('game-screen');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = currentQuestions[currentIndex];
+        
+        // 프로그레스 바 업데이트
+        document.getElementById('progress-fill').style.width = `${((currentIndex) / currentQuestions.length) * 100}%`;
+        
+        document.getElementById('question-tag').innerText = qData.type;
+        document.getElementById('question-text').innerText = `Q${currentIndex + 1}. ${qData.q}`;
+        
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        
+        document.getElementById('feedback-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        qData.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIdx) {
+        const qData = currentQuestions[currentIndex];
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackDesc = document.getElementById('feedback-desc');
+        
+        // 버튼 비활성화
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (selectedIdx === qData.ans) {
+            score += 10;
+            feedbackBox.className = 'feedback-box correct';
+            feedbackTitle.innerText = '⭕ 정답입니다!';
+        } else {
+            feedbackBox.className = 'feedback-box wrong';
+            feedbackTitle.innerText = `❌ 오답입니다. (정답: ${qData.options[qData.ans]})`;
+        }
+
+        feedbackDesc.innerText = qData.exp;
+        feedbackBox.style.display = 'block';
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            finishGame();
+        }
+    }
+
+    function finishGame() {
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('final-score').innerText = score;
+        
+        saveScore(studentInfo.classInfo, studentInfo.name, score);
+        renderLeaderboard();
+        showScreen('result-screen');
+    }
+
+    function saveScore(classInfo, name, score) {
+        let board = JSON.parse(localStorage.getItem('jp_game_leaderboard') || '[]');
+        board.push({ classInfo, name, score, date: new Date().toLocaleDateString() });
+        // 점수 순 내림차순 정렬
+        board.sort((a, b) => b.score - a.score);
+        localStorage.setItem('jp_game_leaderboard', JSON.stringify(board));
+    }
+
+    function renderLeaderboard() {
+        const board = JSON.parse(localStorage.getItem('jp_game_leaderboard') || '[]');
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+
+        board.slice(0, 10).forEach((entry, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${idx + 1}위</b></td>
+                <td>${entry.classInfo}</td>
+                <td>${entry.name}</td>
+                <td><span style="color:var(--primary-color); font-weight:bold;">${entry.score}점</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+</script>
+
+</body>
+</html>
